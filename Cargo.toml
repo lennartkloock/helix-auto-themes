@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs"] }
+sysinfo = "0.36"
+anyhow = "1"
 futures-util = "0.3"
 ashpd = { version = "0.13", features = ["settings"] }
+toml_edit = "0.25"
