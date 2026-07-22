@@ -1,0 +1,9 @@
+[package]
+name = "helix-auto-themes"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+futures-util = "0.3"
+ashpd = { version = "0.13", features = ["settings"] }
