@@ -1,0 +1,10 @@
+[Unit]
+Description=Helix auto themes
+Requires=dbus.socket
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/helix-auto-themes %h/.config/helix/config.toml
+
+[Install]
+WantedBy=default.target
