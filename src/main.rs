@@ -1,23 +1,38 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::Context;
-use ashpd::desktop::settings::{ColorScheme, Settings};
+use ashpd::{
+    desktop::settings::{ColorScheme, Settings},
+    zbus,
+};
 use futures_util::StreamExt;
 use sysinfo::{Signal, System};
 use tokio::io::AsyncWriteExt;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let hx_config_path: PathBuf = std::env::args()
-        .nth(1)
+    let mut args = std::env::args().skip(1);
+    let hx_config_path: PathBuf = args
+        .next()
         .context("missing config path argument")?
         .parse()
         .context("invalid config path argument")?;
+    let dbus_socket_addr = args.next().map(Ok).unwrap_or_else(|| {
+        std::env::var("DBUS_SESSION_BUS_ADDRESS").context(
+            "no dbus address argument was passed but missing DBUS_SESSION_BUS_ADDRESS env var",
+        )
+    })?;
+
     let mut config_path = hx_config_path.clone();
     config_path.pop();
     config_path = config_path.join("auto_themes.toml");
 
-    let proxy = Settings::new().await?;
+    let connection = zbus::connection::Builder::address(dbus_socket_addr.as_str())
+        .context("failed to parse dbus socket address")?
+        .build()
+        .await
+        .context("failed to connect to dbus socket")?;
+    let proxy = Settings::with_connection(connection).await?;
     let color_scheme = proxy
         .read::<ColorScheme>("org.freedesktop.appearance", "color-scheme")
         .await
